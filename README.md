@@ -1,0 +1,1 @@
+# plugins-generate-child-theme
