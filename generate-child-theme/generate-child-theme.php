@@ -16,7 +16,7 @@
  * Plugin Name:       Generate Child Theme
  * Plugin URI:        catchplugins.com/plugins/generate-child-theme
  * Description:       Create child themes of any WordPress themes effortlessly with Generate Child Theme.
- * Version:           2.1
+ * Version:           2.1.1
  * Author:            Catch Plugins
  * Author URI:        catchplugins.com
  * License:           GPL-2.0+
@@ -31,7 +31,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Define Version
-define( 'GENERATECHILDTHEME_VERSION', '2.1' );
+define( 'GENERATECHILDTHEME_VERSION', '2.1.1' );
 
 // The URL of the directory that contains the plugin
 if ( ! defined( 'GENERATECHILDTHEME_URL' ) ) {
