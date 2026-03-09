@@ -3,8 +3,8 @@ Contributors: catchplugins, catchthemes, sakinshrestha, pratikshrestha, maheshma
 Donate link: https://catchplugins.com/plugins/generate-child-theme/
 Tags: child theme, child theme generator, custom theme, design, theme
 Requires at least: 5.9
-Tested up to: 6.8
-Stable tag: trunk
+Tested up to: 7.0
+Stable tag: 2.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -41,6 +41,14 @@ Not so easy way (via FTP) :
 * Go to **Generate Child Theme** from Dashboard menu
 
 == Changelog ==
+
+= 2.2 (Released: March 09, 2026) =
+* Bug Fixed: WordPress.WP.AlternativeFunctions.file_system_operations_mkdir
+* Bug Fixed: WordPress.WP.I18n.MissingTranslatorsComment
+* Bug Fixed: WordPress.WP.I18n.TextDomainMismatch
+* Bug Fixed: plugin_header_invalid_plugin_uri
+* Bug Fixed: outdated_tested_upto_header
+* Compatibility check up to version 7.0
 
 = 2.1.1 (Released: May 13, 2025) =
 * Compatibility check up to version 6.8
