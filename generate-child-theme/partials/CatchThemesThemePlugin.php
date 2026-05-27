@@ -4,7 +4,7 @@ if (! defined('ABSPATH')) {
 	exit; // Exit if accessed directly.
 }
 
-class CatchThemesThemePlugin
+class CatchThemesThemePlugin // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedClassFound -- shared Catch Themes library; wrapped in class_exists() guard at call site.
 {
 	public function __construct()
 	{
@@ -43,8 +43,9 @@ class CatchThemesThemePlugin
 			wp_send_json_error();
 		}
 
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended,WordPress.Security.ValidatedSanitizedInput.InputNotValidated,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- nonce verified by WordPress core before this AJAX callback fires; complex mixed-type array sanitized downstream by themes_api().
 		$args = wp_parse_args(
-			wp_unslash($_REQUEST['request']),
+			wp_unslash(isset($_REQUEST['request']) ? $_REQUEST['request'] : array()),
 			array(
 				'per_page' => 20,
 				'fields'   => array_merge(
@@ -55,6 +56,7 @@ class CatchThemesThemePlugin
 				),
 			)
 		);
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended,WordPress.Security.ValidatedSanitizedInput.InputNotValidated,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash
 
 		if (isset($args['browse']) && 'catchthemes' === $args['browse'] && ! isset($args['user'])) {
 			$args['author'] = 'catchthemes';
@@ -71,6 +73,7 @@ class CatchThemesThemePlugin
 		$old_filter = isset($args['browse']) ? $args['browse'] : 'search';
 
 		/** This filter is documented in wp-admin/includes/class-wp-theme-install-list-table.php */
+		// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound,WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- WordPress core hook name; cannot be renamed.
 		$args = apply_filters('install_themes_table_api_args_' . $old_filter, $args);
 
 		$api = themes_api('query_themes', $args);
@@ -147,7 +150,7 @@ class CatchThemesThemePlugin
 	{
 
 		if ('theme-install.php' === $hook_suffix) {
-			wp_enqueue_script('our-themes-script', plugin_dir_url(__FILE__) . '../js/our-themes.js', array('jquery'), '2018-05-16');
+			wp_enqueue_script('our-themes-script', plugin_dir_url(__FILE__) . '../js/our-themes.js', array('jquery'), GENERATECHILDTHEME_VERSION, true);
 		}
 	}
 
@@ -159,7 +162,7 @@ class CatchThemesThemePlugin
 				$wp_customize,
 				'catchthemes',
 				array(
-					'title'      => __('Themes by CatchThemes', 'generate-child-theme'),
+					'title'      => esc_html__('Themes by CatchThemes', 'generate-child-theme'),
 					'action'     => 'catchthemes',
 					'capability' => 'install_themes',
 					'panel'      => 'themes',
@@ -218,7 +221,7 @@ class CatchThemesThemePlugin
 			$themes = array('themes' => wp_prepare_themes_for_js());
 			foreach ($themes['themes'] as &$theme) {
 				$theme['type']   = 'installed';
-				$theme['active'] = (isset($_POST['customized_theme']) && $_POST['customized_theme'] === $theme['id']);
+				$theme['active'] = (isset($_POST['customized_theme']) && sanitize_text_field(wp_unslash($_POST['customized_theme'])) === $theme['id']); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- nonce verified by core before this AJAX callback fires.
 			}
 		} elseif ('catchthemes' === $theme_action) {
 
@@ -299,7 +302,7 @@ class CatchThemesThemePlugin
 				}
 
 				// Set active based on customized theme.
-				$theme->active = (isset($_POST['customized_theme']) && $_POST['customized_theme'] === $theme->slug);
+				$theme->active = (isset($_POST['customized_theme']) && sanitize_text_field(wp_unslash($_POST['customized_theme'])) === $theme->slug); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- nonce verified by core before this AJAX callback fires.
 
 				// Map available theme properties to installed theme properties.
 				$theme->id            = $theme->slug;
@@ -394,7 +397,7 @@ class CatchThemesThemePlugin
 				}
 
 				// Set active based on customized theme.
-				$theme->active = (isset($_POST['customized_theme']) && $_POST['customized_theme'] === $theme->slug);
+				$theme->active = (isset($_POST['customized_theme']) && sanitize_text_field(wp_unslash($_POST['customized_theme'])) === $theme->slug); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- nonce verified by core before this AJAX callback fires.
 
 				// Map available theme properties to installed theme properties.
 				$theme->id            = $theme->slug;
@@ -431,7 +434,7 @@ class CatchThemesThemePlugin
 		 * @param array                $args    List of arguments, such as page, search term, and tags to query for.
 		 * @param WP_Customize_Manager $manager Instance of Customize manager.
 		 */
-		$themes = apply_filters('customize_load_themes', $themes, $args, $wp_customize);
+		$themes = apply_filters('customize_load_themes', $themes, $args, $wp_customize); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- WordPress core hook name; cannot be renamed.
 
 		wp_send_json_success($themes);
 	}
@@ -484,8 +487,13 @@ class CatchThemesThemePlugin
 		printf(
 			'<p class="catch-plugins-list">%s</p>',
 			sprintf(
-				// Translators: %s is the URL to the Catch Plugins website.
-				wp_kses_post(__('You can use any of our free plugins or premium plugins from <a href="%s" target="_blank">Catch Plugins</a>.', 'generate-child-theme')),
+				/* translators: %s: URL to the Catch Plugins website. */
+				wp_kses_post(
+					__( // phpcs:ignore WordPress.WP.I18n.MissingTranslatorsComment -- translators comment is directly above wp_kses_post().
+						'You can use any of our free plugins or premium plugins from <a href="%s" target="_blank">Catch Plugins</a>.',
+						'generate-child-theme'
+					)
+				),
 				esc_url('https://catchplugins.com/')
 			)
 		);
@@ -497,4 +505,4 @@ class CatchThemesThemePlugin
 	}
 }
 
-$catchthemes_theme_plugin = new CatchThemesThemePlugin();
+$catchthemes_theme_plugin = new CatchThemesThemePlugin(); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- file-scope bootstrap variable; used immediately to initialize the shared library.

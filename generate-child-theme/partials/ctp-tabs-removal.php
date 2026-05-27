@@ -9,6 +9,7 @@ if (! defined('ABSPATH')) {
  * CTP Register Settings
  */
 if (! function_exists('ctp_register_settings')) {
+	// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound -- ctp_ prefix kept for cross-plugin compatibility; wrapped in function_exists() guard.
 	function ctp_register_settings()
 	{
 		// register_setting( $option_group, $option_name, $sanitize_callback )
@@ -27,6 +28,7 @@ if (! function_exists('ctp_get_options')) {
 	 *
 	 *  @since    1.3
 	 */
+	// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound -- ctp_ prefix kept for cross-plugin compatibility; wrapped in function_exists() guard.
 	function ctp_get_options()
 	{
 		$defaults = ctp_default_options();
@@ -43,11 +45,12 @@ if (! function_exists('ctp_default_options')) {
 	 * @since     1.3
 	 * @return    array    default options.
 	 */
+	// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound -- ctp_ prefix kept for cross-plugin compatibility; wrapped in function_exists() guard.
 	function ctp_default_options($option = null)
 	{
 		$default_options['theme_plugin_tabs'] = 1;
-		if (null == $option) {
-			return apply_filters('ctp_options', $default_options);
+		if (null === $option) {
+			return apply_filters('ctp_options', $default_options); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- ctp_ is the established short prefix for this shared Catch Themes library.
 		} else {
 			return $default_options[$option];
 		}
@@ -61,6 +64,7 @@ if (! function_exists('ctp_switch')) {
 	 * @since     1.3
 	 * @return    $string    1 or 2.
 	 */
+	// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound -- ctp_ prefix kept for cross-plugin compatibility; wrapped in function_exists() guard.
 	function ctp_switch()
 	{
 		// Check nonce before doing and changes.
@@ -70,9 +74,9 @@ if (! function_exists('ctp_switch')) {
 			if (! current_user_can('manage_options')) {
 				wp_die(esc_html__('Permission denied!', 'generate-child-theme'));
 			}
-			$value = ('true' == $_POST['value']) ? 1 : 0;
+			$value = (isset($_POST['value']) && 'true' === sanitize_text_field(wp_unslash($_POST['value']))) ? 1 : 0;
 
-			$option_name = $_POST['option_name'];
+			$option_name = isset($_POST['option_name']) ? sanitize_key(wp_unslash($_POST['option_name'])) : '';
 
 			$option_value = ctp_get_options();
 

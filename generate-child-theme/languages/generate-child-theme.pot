@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Generate Child Theme\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/tags/_s\n"
-"POT-Creation-Date: 2026-03-09 14:05+0545\n"
+"POT-Creation-Date: 2026-05-27 12:23+0545\n"
 "PO-Revision-Date: 2016-12-12 09:23-0500\n"
 "Last-Translator: Sakin Shrestha <info@catchplugins.com>\n"
 "Language-Team: Catch Plugins <info@catchplugins.com>\n"
@@ -14,62 +14,66 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Poedit 3.8\n"
+"X-Generator: Poedit 3.9\n"
 "X-Poedit-KeywordsList: "
 "__;_e;_n:1,2;_x:1,2c;esc_attr_e;esc_attr__;_nx;_x;esc_html_e;esc_html__;_ex:1,2c;_nx:4c,1,2;_nx_noop:4c,1,2;_n_noop:1,2;__ngettext_noop:1,2;_c,_nc:4c,1,2\n"
 "X-Poedit-Basepath: .\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-SearchPath-0: ..\n"
 
-#: ../generate-child-theme.php:71 ../generate-child-theme.php:72
+#: ../generate-child-theme.php:75 ../generate-child-theme.php:76
 #: ../partials/generate-child-theme-admin-display.php:23
 msgid "Generate Child Theme"
 msgstr ""
 
-#: ../generate-child-theme.php:85
+#: ../generate-child-theme.php:89
 msgid "You do not have sufficient permissions to access this page."
 msgstr ""
 
-#: ../generate-child-theme.php:188
+#: ../generate-child-theme.php:131
+msgid "Security check failed. Please try again."
+msgstr ""
+
+#: ../generate-child-theme.php:192
 msgid "The directory already exists"
 msgstr ""
 
-#: ../generate-child-theme.php:281
+#: ../generate-child-theme.php:285
 #, php-format
 msgid ""
 "Theme switched! <a href=\"%s\">Click here to edit the child stylesheet</a>."
 msgstr ""
 
-#: ../generate-child-theme.php:300
+#: ../generate-child-theme.php:302
 #, php-format
 msgid "Failed to create file: %s"
 msgstr ""
 
-#: ../partials/CatchThemesThemePlugin.php:162
+#: ../partials/CatchThemesThemePlugin.php:165
 msgid "Themes by CatchThemes"
 msgstr ""
 
-#: ../partials/CatchThemesThemePlugin.php:444
+#: ../partials/CatchThemesThemePlugin.php:447
 msgctxt "Plugin Installer"
 msgid "Catch Plugins"
 msgstr ""
 
-#: ../partials/CatchThemesThemePlugin.php:488
+#: ../partials/CatchThemesThemePlugin.php:493
 #, php-format
 msgid ""
 "You can use any of our free plugins or premium plugins from <a href=\"%s\" "
 "target=\"_blank\">Catch Plugins</a>."
 msgstr ""
 
-#: ../partials/ctp-tabs-removal.php:68
+#: ../partials/ctp-tabs-removal.php:72
 msgid "Invalid Nonce"
 msgstr ""
 
-#: ../partials/ctp-tabs-removal.php:71
+#: ../partials/ctp-tabs-removal.php:75
 msgid "Permission denied!"
 msgstr ""
 
-#: ../partials/ctp-tabs-removal.php:84
+#: ../partials/ctp-tabs-removal.php:88
 msgid "Connection Error. Please try again."
 msgstr ""
 
@@ -270,6 +274,6 @@ msgid ""
 "without affecting your wallet."
 msgstr ""
 
-#: ../partials/sidebar.php:44
+#: ../partials/sidebar.php:43
 msgid "check our free plugins."
 msgstr ""

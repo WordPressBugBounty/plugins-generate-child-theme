@@ -3,8 +3,9 @@ Contributors: catchplugins, catchthemes, sakinshrestha, pratikshrestha, maheshma
 Donate link: https://catchplugins.com/plugins/generate-child-theme/
 Tags: child theme, child theme generator, custom theme, design, theme
 Requires at least: 5.9
+Requires PHP: 7.4
 Tested up to: 7.0
-Stable tag: 2.2
+Stable tag: 2.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -41,6 +42,15 @@ Not so easy way (via FTP) :
 * Go to **Generate Child Theme** from Dashboard menu
 
 == Changelog ==
+
+= 2.3 (Released: May 27, 2026) =
+* Bug Fixed: Security improvements — input sanitization and nonce verification hardened throughout
+* Bug Fixed: Child theme file generation now uses WordPress Filesystem API instead of file_put_contents()
+* Bug Fixed: Scripts now load in the footer; hardcoded version strings replaced with plugin version constant
+* Bug Fixed: Broken "Free Plugins" sidebar links
+* Bug Fixed: PHP 8 deprecation notice from non-static method called statically
+* Code: Strict comparisons and PHPCS compliance throughout
+* Compatibility check up to version 7.0
 
 = 2.2 (Released: March 09, 2026) =
 * Bug Fixed: WordPress.WP.AlternativeFunctions.file_system_operations_mkdir

@@ -15,7 +15,7 @@
  * Plugin Name:       Generate Child Theme
  * Plugin URI:        http://catchplugins.com/plugins/generate-child-theme
  * Description:       Create child themes of any WordPress themes effortlessly with Generate Child Theme.
- * Version:           2.2
+ * Version:           2.3
  * Author:            Catch Plugins
  * Author URI:        http://catchplugins.com
  * License:           GPL-2.0+
@@ -35,7 +35,7 @@ if (! defined('WPINC')) {
  * Rename this for your plugin and update it as you release new versions.
  */
 if ( ! defined( 'GENERATECHILDTHEME_VERSION' ) ) {
-	define( 'GENERATECHILDTHEME_VERSION', '2.2' );
+	define( 'GENERATECHILDTHEME_VERSION', '2.3' );
 }
 
 // The URL of the directory that contains the plugin
@@ -48,7 +48,7 @@ if (! defined('GENERATECHILDTHEME_PATH')) {
 	define('GENERATECHILDTHEME_PATH', plugin_dir_path(__FILE__));
 }
 
-class Generate_Child_Theme
+class Generate_Child_Theme // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedClassFound -- Generate_Child_Theme matches the plugin slug; used as a single instance via generate_child_theme_run().
 {
 
 	public function __construct()
@@ -57,7 +57,11 @@ class Generate_Child_Theme
 		add_action('admin_post_create', array($this, 'process_create_form'));
 		add_filter('plugin_row_meta', array($this, 'add_plugin_meta_links'), 10, 2);
 
-		if (basename($_SERVER['PHP_SELF']) == 'themes.php' && ! empty($_REQUEST['ctcm_status'])) {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- read-only display checks; no data is processed or stored.
+		$gct_php_self    = isset( $_SERVER['PHP_SELF'] ) ? sanitize_text_field( wp_unslash( $_SERVER['PHP_SELF'] ) ) : '';
+		$gct_ctcm_status = isset( $_REQUEST['ctcm_status'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['ctcm_status'] ) ) : '';
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+		if ( 'themes.php' === basename( $gct_php_self ) && ! empty( $gct_ctcm_status ) ) {
 			add_action('admin_notices', array($this, 'showErrorNotice'));
 		}
 
@@ -91,15 +95,15 @@ class Generate_Child_Theme
 	public function process_create_form()
 	{
 		// Verify nonce
-		if (! empty($_POST) && isset($_POST['generate_child_theme_nonce_field']) && wp_verify_nonce($_POST['generate_child_theme_nonce_field'], 'generate_child_theme_nonce')) {
+		if (! empty($_POST) && isset($_POST['generate_child_theme_nonce_field']) && wp_verify_nonce(sanitize_key(wp_unslash($_POST['generate_child_theme_nonce_field'])), 'generate_child_theme_nonce')) {
 
 			// Process form data
 			$info = array(
-				'parent_theme_template' => sanitize_text_field($_POST['parent_template']),
-				'theme_name'            => sanitize_text_field($_POST['child_theme_name']),
-				'theme_description'     => empty($_POST['child_theme_description']) ? 'Your description goes here' : sanitize_text_field(stripslashes($_POST['child_theme_description'])),
-				'theme_author'          => sanitize_text_field($_POST['child_theme_author']),
-				'theme_version'         => empty($_POST['child_theme_version']) ? '1.0' : sanitize_text_field($_POST['child_theme_version']),
+				'parent_theme_template' => isset($_POST['parent_template']) ? sanitize_text_field(wp_unslash($_POST['parent_template'])) : '',
+				'theme_name'            => isset($_POST['child_theme_name']) ? sanitize_text_field(wp_unslash($_POST['child_theme_name'])) : '',
+				'theme_description'     => empty($_POST['child_theme_description']) ? 'Your description goes here' : sanitize_text_field(wp_unslash($_POST['child_theme_description'])),
+				'theme_author'          => isset($_POST['child_theme_author']) ? sanitize_text_field(wp_unslash($_POST['child_theme_author'])) : '',
+				'theme_version'         => empty($_POST['child_theme_version']) ? '1.0' : sanitize_text_field(wp_unslash($_POST['child_theme_version'])),
 			);
 
 			$result = $this->make_child_theme($info);
@@ -124,14 +128,14 @@ class Generate_Child_Theme
 			}
 		} else {
 			// Nonce verification failed, display error message
-			wp_die('Security check failed. Please try again.');
+			wp_die( esc_html__( 'Security check failed. Please try again.', 'generate-child-theme' ) );
 		}
 	}
 
 	function add_plugin_meta_links($meta_fields, $file)
 	{
 
-		if ($file == plugin_basename(__FILE__)) {
+		if ($file === plugin_basename(__FILE__)) {
 
 			$meta_fields[] = "<a href='https://catchplugins.com/support-forum/forum/generate-child-theme/' target='_blank'>Support Forum</a>";
 			$meta_fields[] = "<a href='https://wordpress.org/support/plugin/generate-child-theme/reviews#new-post' target='_blank' title='Rate'>
@@ -196,7 +200,7 @@ class Generate_Child_Theme
 		ob_start();
 		require plugin_dir_path(__FILE__) . 'templates/child-theme-css.php';
 		$css = ob_get_clean();
-		file_put_contents($new_child_theme_path . '/style.css', $css);
+		$wp_filesystem->put_contents($new_child_theme_path . '/style.css', $css, FS_CHMOD_FILE);
 
 		$function_prefix = $theme_slug;
 
@@ -223,7 +227,7 @@ function {$function_prefix}_enqueue_styles() {
  * Your code goes below
  */";
 
-		file_put_contents($new_child_theme_path . '/functions.php', $function_content);
+		$wp_filesystem->put_contents($new_child_theme_path . '/functions.php', $function_content, FS_CHMOD_FILE);
 
 		// RTL support
 		$rtl_theme = (file_exists($parent_theme_dir . '/rtl.css'))
@@ -232,7 +236,7 @@ function {$function_prefix}_enqueue_styles() {
 		ob_start();
 		require plugin_dir_path(__FILE__) . 'templates/rtl-css.php';
 		$css = ob_get_clean();
-		file_put_contents($new_child_theme_path . '/rtl.css', $css);
+		$wp_filesystem->put_contents($new_child_theme_path . '/rtl.css', $css, FS_CHMOD_FILE);
 
 		// Copy screenshot
 		if ($screenshot_template = $this->get_screenshot($parent_theme_dir)) {
@@ -267,19 +271,20 @@ function {$function_prefix}_enqueue_styles() {
 	{
 		$args['ctcm_status'] = $status;
 		$args                = urlencode_deep($args);
-		wp_redirect(add_query_arg($args, $url));
+		wp_safe_redirect(add_query_arg($args, $url));
+		exit;
 	}
 
 	public function showErrorNotice()
 	{
-		switch ($_GET['ctcm_status']) {
+		$ctcm_status = isset( $_GET['ctcm_status'] ) ? sanitize_text_field( wp_unslash( $_GET['ctcm_status'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only display check; value was set by this plugin's own wp_safe_redirect().
+		switch ( $ctcm_status ) {
 			case 'child_created': //SUCCESS: child theme created
 				$type = 'updated'; //fade?
+				// translators: %s is a stylesheet of a switched theme for edit.
+				$switched_msg = __( 'Theme switched! <a href="%s">Click here to edit the child stylesheet</a>.', 'generate-child-theme' );
 				$msg  = sprintf(
-					wp_kses_post(
-						// Translators: %s is a stylesheet of a switched theme for a edit.
-						__('Theme switched! <a href="%s">Click here to edit the child stylesheet</a>.', 'generate-child-theme')
-					),
+					wp_kses_post( $switched_msg ),
 					add_query_arg(
 						urlencode_deep(
 							array(
@@ -293,18 +298,16 @@ function {$function_prefix}_enqueue_styles() {
 				break;
 			case 'create_failed': //ERROR: create file failed (probably due to permissions)
 				$type = 'error';
+				// translators: %s is error template failed to create.
+				$failed_msg = __( 'Failed to create file: %s', 'generate-child-theme' );
 				$msg  = sprintf(
-
-					wp_kses_post(
-						// Translators: %s is error template failed to create. 
-						__('Failed to create file: %s', 'generate-child-theme')
-					),
-					esc_html($_GET['template'])
+					wp_kses_post( $failed_msg ),
+					esc_html( isset( $_GET['template'] ) ? sanitize_text_field( wp_unslash( $_GET['template'] ) ) : '' ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only display check; value was set by this plugin's own wp_safe_redirect().
 				);
 				break;
 			default: //ERROR: it is a generic error message
 				$type = 'error';
-				$msg  = esc_html($_GET['ctcm_status']);
+				$msg  = esc_html( $ctcm_status );
 		}
 
 		printf(
@@ -317,21 +320,23 @@ function {$function_prefix}_enqueue_styles() {
 
 	public function enqueue_styles()
 	{
-		if (isset($_GET['page']) && 'generate-child-theme' == $_GET['page']) {
-			wp_enqueue_style('generate-child-theme', plugin_dir_url(__FILE__) . 'css/generate-child-theme.css', array(), '1.0', 'all');
-			wp_enqueue_style('generate-child-theme-tabs', plugin_dir_url(__FILE__) . 'css/admin-dashboard.css', array(), '1.0', 'all');
+		$page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only routing check; no data is processed.
+		if ( 'generate-child-theme' === $page ) {
+			wp_enqueue_style('generate-child-theme', plugin_dir_url(__FILE__) . 'css/generate-child-theme.css', array(), GENERATECHILDTHEME_VERSION, 'all');
+			wp_enqueue_style('generate-child-theme-tabs', plugin_dir_url(__FILE__) . 'css/admin-dashboard.css', array(), GENERATECHILDTHEME_VERSION, 'all');
 		}
 	}
 
 	public function enqueue_scripts()
 	{
-		if (isset($_GET['page']) && 'generate-child-theme' == $_GET['page']) {
-			wp_enqueue_script('minHeight', plugin_dir_url(__FILE__) . 'js/jquery.matchHeight.min.js', array('jquery'), '1.0', false);
-			wp_enqueue_script('generate-child-theme-js', plugin_dir_url(__FILE__) . 'js/generate-child-theme-admin.js', array('minHeight', 'jquery'), '1.0', false);
+		$page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only routing check; no data is processed.
+		if ( 'generate-child-theme' === $page ) {
+			wp_enqueue_script('minHeight', plugin_dir_url(__FILE__) . 'js/jquery.matchHeight.min.js', array('jquery'), GENERATECHILDTHEME_VERSION, true);
+			wp_enqueue_script('generate-child-theme-js', plugin_dir_url(__FILE__) . 'js/generate-child-theme-admin.js', array('minHeight', 'jquery'), GENERATECHILDTHEME_VERSION, true);
 		}
 	}
 
-	public function get_theme_list()
+	public static function get_theme_list()
 	{
 		$themes = wp_get_themes();
 		$list   = array();
@@ -346,17 +351,15 @@ function {$function_prefix}_enqueue_styles() {
 
 function generate_child_theme_run()
 {
-
-	$plugin = new Generate_Child_Theme();
-	$plugin;
+	new Generate_Child_Theme();
 }
 generate_child_theme_run();
 
 /* CTP tabs removal options */
 require plugin_dir_path(__FILE__) . 'partials/ctp-tabs-removal.php';
 
-$ctp_options = ctp_get_options();
-if (1 == $ctp_options['theme_plugin_tabs']) {
+$ctp_options = ctp_get_options(); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- file-scope bootstrap variable used immediately below.
+if (1 === $ctp_options['theme_plugin_tabs']) {
 	/* Adds Catch Themes tab in Add theme page and Themes by Catch Themes in Customizer's change theme option. */
 	if (! class_exists('CatchThemesThemePlugin') && ! function_exists('add_our_plugins_tab')) {
 		require plugin_dir_path(__FILE__) . 'partials/CatchThemesThemePlugin.php';
